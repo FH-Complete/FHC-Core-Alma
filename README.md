@@ -1,2 +1,2 @@
 # FHC-Core-Alma
-Extension for ALMA
+This Repository handles Data Export from FH-Complete to the Alma Library System

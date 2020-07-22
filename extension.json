@@ -1,0 +1,8 @@
+{
+	"name": "FHC-Core-Alma",
+	"description": "Extension for Alma",
+	"version": "1",
+	"license": "GPL",
+	"url": "https://github.com/FH-Complete/FHC-Core-Alma",
+	"core_version": "3.3"
+}
