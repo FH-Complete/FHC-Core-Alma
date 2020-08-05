@@ -154,12 +154,7 @@ class Alma extends Auth_Controller
 			//  --------------------------------------------------------------------------------------------------------
 			//  <addresses>
 			$address_obj = NULL;
-			$result = $this->AdresseModel->getZustellAdresse($campus_user->person_id, array(
-				'strasse',
-				'plz',
-				'ort',
-				'nation'
-			));
+			$result = $this->AdresseModel->getZustellAdresse($campus_user->person_id, 'strasse, plz, ort, nation');
 
 			if (hasData($result))
 			{
