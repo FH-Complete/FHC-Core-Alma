@@ -23,13 +23,13 @@
 			<div class="container-fluid">
 				<div class="row">
 					<div class="col-lg-12">
-						<h3 class="page-header">Alma <small> | Datensynchronisation</small></h3>
+						<h3 class="page-header">Alma <small> | Datenexport</small></h3>
 					</div>
 				</div>
                 <div class="row">
                     <div class="col-lg-12">
-                        <p>Synchronisiert werden Userdaten zwischen dem FH Campus und dem ALMA Bibliotheksystem.</p>
-                        <p>Die aktualisierten Daten werden als XML file exportiert, gezippt und im ALMA System hochgeladen.</p>
+                        <p>Die Userdaten werden zwischen dem FH Campus und dem ALMA Bibliotheksystem synchronisiert.</p>
+                        <p>Die aktualisierten Daten werden als XML file exportiert, gezippt und müssen dann im ALMA System hochgeladen werden.</p>
                     </div>
                 </div>
                 <br><br>
