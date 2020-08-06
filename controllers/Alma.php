@@ -14,7 +14,7 @@ class Alma extends Auth_Controller
 	const STUDENT_PHONE_TYPE_DESC = 'home';
 	const MITARBEITER_USER_GROUP = '03';
 	const MITARBEITER_EXPIRY_DATE = '2099-12-31';
-	const MITARBEITER_ADDRESS_TYPE_DESC = 'work';
+	const MITARBEITER_ADDRESS_TYPE_DESC = 'home';
 	const MITARBEITER_EMAIL_TYPE_DESC = 'work';
 	const MITARBEITER_PHONE_TYPE_DESC = 'work';
 	const ADDRESS_TYPE = 'home';
@@ -131,9 +131,7 @@ class Alma extends Auth_Controller
 			$user = new StdClass();
 
 			$user->person_id        = $campus_user->person_id;
-			$user->alma_match_id    = !empty($campus_user->alma_match_id)
-									? $campus_user->alma_match_id
-									: show_error('Missing alma_match_id for personID'. $campus_user->person_id);
+			$user->alma_match_id    = $campus_user->alma_match_id;
 			$user->first_name       = $campus_user->vorname;
 			$user->last_name        = $campus_user->nachname;
 			$user->user_title       = trim($campus_user->titelpre. ' '. $campus_user->titelpost);
@@ -211,7 +209,7 @@ class Alma extends Auth_Controller
 			}
 
 			// if no campus card ID was found, use default ID
-			if (empty($campus_card_id))
+			if (is_null($campus_card_id))
 			{
 				$campus_card_id = $campus_user->user_group_desc == 'Student'
 								? 'TWSTD'. $campus_user->uid
