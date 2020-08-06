@@ -18,6 +18,7 @@ class Alma extends Auth_Controller
 	const MITARBEITER_EMAIL_TYPE_DESC = 'work';
 	const MITARBEITER_PHONE_TYPE_DESC = 'work';
 	const ADDRESS_TYPE = 'home';
+	const FILENAME_PREFIX = '03_ftw_';
 
 	/**
 	 * Constructor
@@ -256,7 +257,13 @@ class Alma extends Auth_Controller
 		//  LOAD XML VIEW
 		//  ------------------------------------------------------------------------------------------------------------
 		$params = array('user_arr' => $user_arr);
-		$this->output->set_content_type('application/xml');
+		$this->output->set_header('HTTP/1.0 200 OK');
+		$this->output->set_header('HTTP/1.1 200 OK');
+		$this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate');
+		$this->output->set_header('Cache-Control: post-check=0, pre-check=0');
+		$this->output->set_header('Pragma: no-cache');
+		$this->output->set_header('Content-Disposition: attachment; filename="'. self::FILENAME_PREFIX. $today. '.xml"');
+		$this->output->set_content_type('application/xml', 'utf-8');
 		$this->load->view('extensions/FHC-Core-Alma/export', $params);
 	}
 
