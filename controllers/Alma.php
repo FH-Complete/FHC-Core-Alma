@@ -121,6 +121,7 @@ class Alma extends Auth_Controller
 		//  <user>
 		//  ------------------------------------------------------------------------------------------------------------
 		$user_arr = array();    // Prepared user data for XML export
+		$today = (new DateTime())->format('Y-m-d');
 		$student_expiry_date = new DateTime();
 		$student_expiry_date->add(new DateInterval('P5Y'));
 		$student_expiry_date = $student_expiry_date->format('Y-m-d');
@@ -228,8 +229,7 @@ class Alma extends Auth_Controller
 			// UID
 			// Set uid only for new user
 			$user->uid = (in_array($campus_user->person_id, array_column($new_user_arr, 'person_id')) ||
-						(new DateTime($campus_user->alma_insertamum))->format('Y-m-d') ==
-						(new DateTime())->format('Y-m-d'))
+							(new DateTime($campus_user->alma_insertamum))->format('Y-m-d') == $today)
 						? $campus_user->uid
 						: NULL;
 
