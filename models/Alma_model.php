@@ -116,7 +116,13 @@ class Alma_model extends DB_Model
 		}
 
 		return '
-		SELECT DISTINCT ON (person_id) person_id, uid, vorname, nachname, titelpre, user_group_desc, insertamum, vornamen, geschlecht, titelpost, gebdatum
+		SELECT DISTINCT ON (person_id) person_id, uid, vorname, nachname, titelpre, user_group_desc, insertamum, vornamen, titelpost, gebdatum,
+		CASE
+			WHEN geschlecht = \'m\' THEN \'MALE\'
+			WHEN geschlecht = \'w\' THEN \'FEMALE\'
+			WHEN geschlecht = \'x\' THEN \'OTHER\'
+			ELSE \'NONE\'
+		END AS geschlecht
 		FROM (
 			SELECT vorname, nachname, titelpre, person_id, uid, \'Student\' as user_group_desc, insertamum, vornamen, geschlecht, titelpost, gebdatum,
 				CASE WHEN stg.typ=\'m\' THEN 2

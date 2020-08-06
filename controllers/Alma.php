@@ -136,7 +136,7 @@ class Alma extends Auth_Controller
 			$user->first_name       = $campus_user->vorname;
 			$user->last_name        = $campus_user->nachname;
 			$user->user_title       = trim($campus_user->titelpre. ' '. $campus_user->titelpost);
-			$user->gender           = $this->_convertGender($campus_user->geschlecht);
+			$user->gender           = $campus_user->geschlecht;
 			$user->birth_date       = (new DateTime($campus_user->gebdatum))->format('Y-m-d');
 			$user->expiry_date      = $campus_user->user_group_desc == 'Student'
 									? $student_expiry_date
@@ -260,26 +260,6 @@ class Alma extends Auth_Controller
 		$this->uid = getAuthUID();
 
 		if (!$this->uid) show_error('User authentification failed');
-	}
-
-	/**
-	 * Converts postgre gender to alma gender.
-	 * @param string $gender
-	 * @return string
-	 */
-	private function _convertGender($gender)
-	{
-		switch($gender)
-		{
-			case 'm':
-				return 'MALE';
-			case 'w':
-				return 'FEMALE';
-			case 'x':
-				return 'OTHER';
-			default:
-				return 'NONE';
-		}
 	}
 
 }
