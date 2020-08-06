@@ -64,6 +64,20 @@ class Alma extends Auth_Controller
 
 	public function export()
 	{
+		// Actual Studiesemester
+		$result = $this->StudiensemesterModel->getLastOrAktSemester();
+		if (!$ss_act = getData($result)[0]->studiensemester_kurzbz)
+		{
+			show_error('Failed retrieving actual term.');
+		}
+
+		// Next Studiensemester
+		$result = $this->StudiensemesterModel->getNextFrom($ss_act);
+		if (!$ss_next = getData($result)[0]->studiensemester_kurzbz)
+		{
+			show_error('Failed retrieving next term.');
+		}
+
 		//  Detect present user situation in alma.
 		//  ------------------------------------------------------------------------------------------------------------
 		 /**
@@ -71,7 +85,7 @@ class Alma extends Auth_Controller
 		  * New user is new active campus user that is not present in alma yet.
 		  * */
 		$new_user_arr = array();
-		$result = $this->AlmaModel->getNewUser();
+		$result = $this->AlmaModel->getNewUser($ss_act, $ss_next);
 		if (hasData($result))
 		{
 			if (!$new_user_arr = getData($result))
@@ -85,7 +99,7 @@ class Alma extends Auth_Controller
 		 * Outdated user is alma user that is not present in ACTIVE campus user anymore.
 		 * */
 		$outdated_user_arr = array();
-		$result = $this->AlmaModel->getOutdatedUser();
+		$result = $this->AlmaModel->getOutdatedUser($ss_act, $ss_next);
 		if (hasData($result))
 		{
 			if (!$outdated_user_arr = getData($result))
@@ -109,7 +123,7 @@ class Alma extends Auth_Controller
 		 * Retrieves user data incl. alma match id for present and new alma user. (just inserted to alma)
 		 * */
 		//  ------------------------------------------------------------------------------------------------------------
-		$campus_active_user_arr = $this->AlmaModel->getActiveCampusUserData();
+		$campus_active_user_arr = $this->AlmaModel->getActiveCampusUserData($ss_act, $ss_next);
 		if (!$campus_active_user_arr = getData($campus_active_user_arr))
 		{
 			show_error($campus_active_user_arr->retval);

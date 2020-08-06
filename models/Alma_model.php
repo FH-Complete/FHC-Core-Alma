@@ -20,9 +20,9 @@ class Alma_model extends DB_Model
 	 * Get all new user.
 	 * New user is new active campus user that is not present in alma yet.
 	 */
-	public function getNewUser()
+	public function getNewUser($ss_act, $ss_next)
 	{
-		$active_campus_user = $this->_getQueryString_activeCampusUser();
+		$active_campus_user = $this->_getQueryString_activeCampusUser($ss_act, $ss_next);
 
 		$qry = '
 			SELECT person_id FROM ('. $active_campus_user. ') AS campus
@@ -38,9 +38,9 @@ class Alma_model extends DB_Model
 	 * Get all present user.
 	 * Present user is active campus user that is also present in alma yet.
 	 */
-	public function getPresentUser()
+	public function getPresentUser($ss_act, $ss_next)
 	{
-		$active_campus_user = $this->_getQueryString_activeCampusUser();
+		$active_campus_user = $this->_getQueryString_activeCampusUser($ss_act, $ss_next);
 
 		$qry = '
 			SELECT person_id FROM ('. $active_campus_user. ') AS campus
@@ -56,9 +56,9 @@ class Alma_model extends DB_Model
 	 * Get all outdated user.
 	 * Outdated user is alma user that is not present in active campus user anymore.
 	 */
-	public function getOutdatedUser()
+	public function getOutdatedUser($ss_act, $ss_next)
 	{
-		$campus_user = $this->_getQueryString_activeCampusUser();
+		$campus_user = $this->_getQueryString_activeCampusUser($ss_act, $ss_next);
 
 		$qry = '
 			SELECT person_id FROM sync.tbl_alma AS alma
@@ -76,9 +76,9 @@ class Alma_model extends DB_Model
 	 * Campus user are retrieved unique by their prioritized role.
 	 * @return mixed
 	 */
-	public function getActiveCampusUserData()
+	public function getActiveCampusUserData($ss_act, $ss_next)
 	{
-		$qry_campus_user = $this->_getQueryString_activeCampusUser();
+		$qry_campus_user = $this->_getQueryString_activeCampusUser($ss_act, $ss_next);
 
 		$qry = '
 			WITH tmp_tbl AS ('. $qry_campus_user. ')
@@ -97,24 +97,8 @@ class Alma_model extends DB_Model
 	 * Prio: Mitarbeiter > Masterstudent > Bachelorstudent > Lehrgangsstudent > Sonstiges
 	 * @return string
 	 */
-	private function _getQueryString_activeCampusUser()
+	private function _getQueryString_activeCampusUser($ss_act, $ss_next)
 	{
-		$this->load->model('organisation/Studiensemester_model', 'StudiensemesterModel');
-
-		// Actual Studiesemester
-		$result = $this->StudiensemesterModel->getLastOrAktSemester();
-		if (!$ss_act = getData($result)[0]->studiensemester_kurzbz)
-		{
-			show_error('Failed retrieving actual term.');
-		}
-
-		// Next Studiensemester
-		$result = $this->StudiensemesterModel->getNextFrom($ss_act);
-		if (!$ss_next = getData($result)[0]->studiensemester_kurzbz)
-		{
-			show_error('Failed retrieving next term.');
-		}
-
 		return '
 		SELECT DISTINCT ON (person_id) person_id, uid, vorname, nachname, titelpre, user_group_desc, insertamum, vornamen, titelpost, gebdatum,
 		CASE
