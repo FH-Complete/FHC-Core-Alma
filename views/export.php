@@ -61,10 +61,14 @@
                         <id_type desc="Campus_Card_ID">02</id_type>
                         <value><?php echo $user->campus_card_id; ?></value>
                     </user_identifier>
-                    <?php if (!is_null($user->uid)): ?>)
+                    <user_identifier>
+                        <id_type desc="UID">05</id_type>
+                        <value><?php echo $user->uid; ?></value>
+                    </user_identifier>
+                    <?php if (!is_null($user->password)): ?>)
                         <user_identifier>
-                            <id_type desc="UID">05</id_type>
-                            <value><?php echo $user->uid; ?></value>
+                            <id_type desc="Password">07</id_type>
+                            <value><?php echo $user->password; ?></value>
                         </user_identifier>
                     <?php endif; ?>
                 </user_identifiers>
