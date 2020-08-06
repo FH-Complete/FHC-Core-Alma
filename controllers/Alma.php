@@ -182,17 +182,18 @@ class Alma extends Auth_Controller
 
 
 			// <phones>
-			$phone_number = '';
-			$result = $this->KontaktModel->getAll_byPersonID($campus_user->person_id);
-			if ($kontakt_arr = getData($result))
+			$phone_number = NULL;
+			$phone_type_desc = '';
+
+			// retrieve phone prioritized by telefonnummer > mobil > firmenhandy > standorttelefon
+			$result = $this->KontaktModel->getPhones_byPerson($campus_user->person_id);
+			if ($kontakt = getData($result)[0]) // get top of prio phone list
 			{
-				// prioritize telefonnummer > mobil > firmenhandy > standorttelefon
-				$phone_number = $this->_getPhoneNumber_byPrio($kontakt_arr);
+				$phone_number = trim($kontakt->kontakt, '.');
+				$phone_type_desc = $kontakt->kontakttyp;
 			}
 			$user->phone_number     = $phone_number;
-			$user->phone_type_desc  = $campus_user->user_group_desc == 'Student'
-									? self::STUDENT_PHONE_TYPE_DESC
-									: self::MITARBEITER_PHONE_TYPE_DESC;
+			$user->phone_type_desc  = $phone_type_desc;
 
 
 			//  <user_identifiers>
@@ -281,29 +282,4 @@ class Alma extends Auth_Controller
 		}
 	}
 
-	/**
-	 * Returns highest prioritized phone number.
-	 * Prio: telefon > mobil > firmenhandy > standorttelefon > else empty
-	 * @param array $kontakt_arr
-	 */
-	private function _getPhoneNumber_byPrio($kontakt_arr)
-	{
-		if ($index = array_search('telefon', array_column($kontakt_arr, 'kontakttyp')))
-		{
-			return $kontakt_arr[$index]->kontakt;
-		}
-		if ($index = array_search('mobil', array_column($kontakt_arr, 'kontakttyp')))
-		{
-			return $kontakt_arr[$index]->kontakt;
-		}
-		if ($index = array_search('firmenhandy', array_column($kontakt_arr, 'kontakttyp')))
-		{
-			return $kontakt_arr[$index]->kontakt;
-		}
-		if ($index = array_search('so.tel', array_column($kontakt_arr, 'kontakttyp')))
-		{
-			return $kontakt_arr[$index]->kontakt;
-		}
-		return;
-	}
 }
