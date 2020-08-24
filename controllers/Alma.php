@@ -242,14 +242,6 @@ class Alma extends Auth_Controller
 			// UID
 			$user->uid = $campus_user->uid;
 
-			// New
-			// Set password (= birthday) only for new user
-			$user->password = (in_array($campus_user->person_id, array_column($new_user_arr, 'person_id')) ||
-				(new DateTime($campus_user->alma_insertamum))->format('Y-m-d') == $today)
-				? (new DateTime($campus_user->gebdatum))->format('Ymd')
-				: NULL;
-
-
 			//  Push user to user-array
 			//  --------------------------------------------------------------------------------------------------------
 			$user_arr []= $user;
