@@ -14,6 +14,9 @@ class Alma_model extends DB_Model
 		parent::__construct();
 		$this->dbTable = 'sync.tbl_alma';
 		$this->pk = 'person_id';
+
+		// Config vars
+		$this->excluded_study_programs = $this->_ci->config->item('excluded_study_programs');
 	}
 
 	/**
@@ -99,7 +102,7 @@ class Alma_model extends DB_Model
 	 */
 	private function _getQueryString_activeCampusUser($ss_act, $ss_next)
 	{
-		return '
+		$qry_string = '
 		SELECT DISTINCT ON (person_id) person_id, uid, vorname, nachname, titelpre, user_group_desc, insertamum, vornamen, titelpost, gebdatum,
 		CASE
 			WHEN geschlecht = \'m\' THEN \'MALE\'
@@ -120,7 +123,16 @@ class Alma_model extends DB_Model
 				SELECT 1
 				FROM public.tbl_prestudentstatus
 				WHERE prestudent_id=vw_student.prestudent_id
-				AND studiensemester_kurzbz IN('. $this->escape($ss_act). ', '. $this->escape($ss_next). ')
+				AND studiensemester_kurzbz IN('. $this->escape($ss_act). ', '. $this->escape($ss_next). ')';
+
+		if(!is_null($this->excluded_study_programs) && !empty($this->excluded_study_programs))
+		{
+			$qry_string .= '
+					AND studiengang_kz NOT IN ('. implode(',', $this->excluded_study_programs). ')
+				';
+		}
+
+		$qry_string .= '
 			)
 			AND vw_student.aktiv
 
@@ -134,5 +146,7 @@ class Alma_model extends DB_Model
 		) a
 		ORDER BY person_id, prio, insertamum DESC
 		';
+
+		return $qry_string;
 	}
 }
