@@ -31,6 +31,10 @@ class Alma extends Auth_Controller
 			)
 		);
 
+//		// Loads config file
+		$this->_ci =& get_instance(); // get code igniter instance
+		$this->_ci->config->load('extensions/FHC-Core-Alma/ALMAConfig');
+
 		// Loads models
 		$this->load->model('extensions/FHC-Core-Alma/Alma_model', 'AlmaModel');
 		$this->load->model('person/Kontakt_model', 'KontaktModel');
@@ -59,8 +63,42 @@ class Alma extends Auth_Controller
 	 */
 	public function index()
 	{
+		// Actual Studiesemester
+		$result = $this->StudiensemesterModel->getLastOrAktSemester();
+		if (!$ss_act = getData($result)[0]->studiensemester_kurzbz)
+		{
+			show_error('Failed retrieving actual term.');
+		}
+
+		// Next Studiensemester
+		$result = $this->StudiensemesterModel->getNextFrom($ss_act);
+		if (!$ss_next = getData($result)[0]->studiensemester_kurzbz)
+		{
+			show_error('Failed retrieving next term.');
+		}
+
+		/**
+		 * Get all active campus user, that are already in ALMA system but with other person_id.
+		 * They should not be inserted twice.
+		 */
+		$allowed_double_person_arr = $this->_ci->config->item('allowed_double_personIDs');
+
+		$double_person_arr = array();
+		$result = $this->AlmaModel->checkDoublePersons($ss_act, $ss_next, $allowed_double_person_arr);
+		if (hasData($result))
+		{
+			if (!$double_person_arr = getData($result))
+			{
+				show_error($double_person_arr->retval);
+			}
+		}
+
+		$view_data = array(
+			'double_person_arr' => $double_person_arr
+		);
+
 		$this->load->library('WidgetLib');
-		$this->load->view('extensions/FHC-Core-Alma/Alma');
+		$this->load->view('extensions/FHC-Core-Alma/Alma', $view_data);
 	}
 
 	public function export()
@@ -81,6 +119,23 @@ class Alma extends Auth_Controller
 
 		//  Detect present user situation in alma.
 		//  ------------------------------------------------------------------------------------------------------------
+		/**
+		 * Get all active campus user, that are already in ALMA system but with other person_id.
+		 * They should not be inserted twice.
+		 */
+		$allowed_double_person_arr = $this->_ci->config->item('allowed_double_personIDs');
+
+		$double_person_arr = array();
+		$result = $this->AlmaModel->checkDoublePersons($ss_act, $ss_next, $allowed_double_person_arr);
+
+		if (hasData($result))
+		{
+			if (!$double_person_arr = getData($result))
+			{
+				show_error($double_person_arr->retval);
+			}
+		}
+
 		 /**
 		  * Get all new user.
 		  * New user is new active campus user that is not present in alma yet.
@@ -94,6 +149,11 @@ class Alma extends Auth_Controller
 				show_error($new_user_arr->retval);
 			}
 		}
+
+		// Filter user with double person_id entries
+		$new_user_arr = array_filter($new_user_arr, function($elem) use ($double_person_arr){
+			return !in_array($elem->person_id, array_column($double_person_arr, 'person_id'));
+		});
 		
 		/**
 		 * Get all outdated user.
@@ -129,6 +189,11 @@ class Alma extends Auth_Controller
 		{
 			show_error($campus_active_user_arr->retval);
 		}
+
+		// Filter user with double person_id entries
+		$campus_active_user_arr = array_filter($campus_active_user_arr, function($elem) use ($double_person_arr){
+			return !in_array($elem->person_id, array_column($double_person_arr, 'person_id'));
+		});
 
 		//  ------------------------------------------------------------------------------------------------------------
 		//  BUILD XML
