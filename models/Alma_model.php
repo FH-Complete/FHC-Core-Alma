@@ -20,6 +20,47 @@ class Alma_model extends DB_Model
 	}
 
 	/**
+	 * Get all persons with same vorname, nachname and birthdate, but different person_ids.
+	 * Therefore get all active campus user and compare with user of alma table for same vorname, nachname and birthdate.
+	 * If doulbe entries are found, they should be first matched together in VILSECI tool.
+	 * They should NOT be inserted into alma table as new user.
+	 * @return mixed
+	 */
+	public function checkDoublePersons($ss_act, $ss_next, $allowed_double_person_arr)
+	{
+		$qry_campus_user = $this->_getQueryString_activeCampusUser($ss_act, $ss_next);
+
+		$qry = '
+			WITH 
+			tmp_campus AS ('. $qry_campus_user. '),
+			tmp_alma AS (
+				SELECT person_id AS alma_person_id, vorname, nachname, gebdatum 
+				FROM sync.tbl_alma
+				JOIN public.tbl_person USING (person_id)
+			) 
+				
+			SELECT * from tmp_campus 
+			JOIN tmp_alma ON
+				tmp_campus.nachname = tmp_alma.nachname AND
+				tmp_campus.vorname = tmp_alma.vorname AND
+				tmp_campus.gebdatum = tmp_alma.gebdatum AND
+				tmp_campus.person_id != tmp_alma.alma_person_id ';
+
+		if(!is_null($allowed_double_person_arr) && !empty($allowed_double_person_arr))
+		{
+			$qry .= '
+				AND tmp_campus.person_id NOT IN ?
+			';
+		}
+
+		$qry .= '		
+			ORDER BY tmp_campus.nachname, tmp_campus.vorname, tmp_campus.gebdatum
+		';
+
+		return $this->execQuery($qry, array($allowed_double_person_arr));
+	}
+
+	/**
 	 * Get all new user.
 	 * New user is new active campus user that is not present in alma yet.
 	 */
