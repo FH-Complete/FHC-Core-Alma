@@ -231,48 +231,12 @@ class Alma extends Auth_Controller
 
 			//  <contact_info>
 			//  --------------------------------------------------------------------------------------------------------
-			//  <addresses>
-			$address_obj = NULL;
-			$result = $this->AdresseModel->getZustellAdresse($campus_user->person_id, 'strasse, plz, ort, nation');
-
-			if (hasData($result))
-			{
-				if ($address_obj = getData($result)[0])
-				{
-					// Only store address if at least strasse is given
-					if (empty($address_obj->strasse))
-					{
-						$address_obj = NULL;    // otherwise reset address obj to null
-					}
-				}
-			}
-			$user->address = $address_obj;
-			$user->address_type_desc = $campus_user->user_group_desc == 'Student'
-										? self::STUDENT_ADDRESS_TYPE_DESC
-										: self::MITARBEITER_ADDRESS_TYPE_DESC;
-			$user->address_type = self::ADDRESS_TYPE;
-
 
 			// <emails>
 			$user->email_address    = $campus_user->uid. '@'. DOMAIN;
 			$user->email_type_desc  = $campus_user->user_group_desc == 'Student'
 									? self::STUDENT_EMAIL_TYPE_DESC
 									: self::MITARBEITER_EMAIL_TYPE_DESC;
-
-
-			// <phones>
-			$phone_number = NULL;
-			$phone_type_desc = '';
-
-			// retrieve phone prioritized by telefonnummer > mobil > firmenhandy > standorttelefon
-			$result = $this->KontaktModel->getPhones_byPerson($campus_user->person_id);
-			if ($kontakt = getData($result)[0]) // get top of prio phone list
-			{
-				$phone_number = trim($kontakt->kontakt, '.');
-				$phone_type_desc = $kontakt->kontakttyp;
-			}
-			$user->phone_number     = $phone_number;
-			$user->phone_type_desc  = $phone_type_desc;
 
 
 			//  <user_identifiers>

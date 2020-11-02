@@ -18,19 +18,6 @@
                 <?php endif; ?>
                 <user_group desc="<?php echo $user->user_group_desc; ?>"><?php echo $user->user_group; ?></user_group>
                 <contact_info>
-                    <addresses>
-                    <?php if (!is_null($user->address)): ?>
-                        <address preferred="true">
-                            <line1><?php echo xml_convert($user->address->strasse); ?></line1>
-                            <postal_code><?php echo $user->address->plz; ?></postal_code>
-                            <city><?php echo $user->address->ort; ?></city>
-                            <country><?php echo $user->address->nation; ?></country>
-                            <address_types>
-                                <address_type desc="<?php echo $user->address_type_desc; ?>"><?php echo $user->address_type; ?></address_type>
-                            </address_types>
-                        </address>
-                    <?php endif; ?>
-                    </addresses>
                     <emails>
                     <?php if (!is_null($user->email_address)): ?>
                         <email preferred="true">
@@ -41,16 +28,6 @@
                         </email>
                     <?php endif; ?>
                     </emails>
-                    <phones>
-                    <?php if (!is_null($user->phone_number)): ?>
-                        <phone preferred="true">
-                            <phone_number><?php echo $user->phone_number; ?></phone_number>
-                            <phone_types>
-                                <phone_type><?php echo $user->phone_type_desc; ?></phone_type>
-                            </phone_types>
-                        </phone>
-                    <?php endif; ?>
-                    </phones>
                 </contact_info>
                 <user_identifiers>
                     <user_identifier>
