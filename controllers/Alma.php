@@ -9,15 +9,10 @@ if (! defined('BASEPATH')) exit('No direct script access allowed');
 class Alma extends Auth_Controller
 {
 	const STUDENT_USER_GROUP = '01';
-	const STUDENT_ADDRESS_TYPE_DESC = 'home';
-	const STUDENT_EMAIL_TYPE_DESC = 'alternative';
-	const STUDENT_PHONE_TYPE_DESC = 'home';
+	const STUDENT_EMAIL_TYPE_DESC = 'campus';
 	const MITARBEITER_USER_GROUP = '03';
 	const MITARBEITER_EXPIRY_DATE = '2099-12-31';
-	const MITARBEITER_ADDRESS_TYPE_DESC = 'home';
 	const MITARBEITER_EMAIL_TYPE_DESC = 'work';
-	const MITARBEITER_PHONE_TYPE_DESC = 'work';
-	const ADDRESS_TYPE = 'home';
 	const FILENAME_PREFIX = '03_ftw_';
 
 	/**
@@ -103,6 +98,8 @@ class Alma extends Auth_Controller
 
 	public function export()
 	{
+		$today = (new DateTime())->format('Y-m-d');
+
 		// Actual Studiesemester
 		$result = $this->StudiensemesterModel->getLastOrAktSemester();
 		if (!$ss_act = getData($result)[0]->studiensemester_kurzbz)
@@ -156,16 +153,35 @@ class Alma extends Auth_Controller
 		});
 		
 		/**
-		 * Get all outdated user.
-		 * Outdated user is alma user that is not present in ACTIVE campus user anymore.
+		 * Get all inactive user.
+		 * Inactive user is alma user that is not present in campus' active user array anymore.
 		 * */
-		$outdated_user_arr = array();
-		$result = $this->AlmaModel->getOutdatedUser($ss_act, $ss_next);
+		$inactive_user_arr = array();
+		$result = $this->AlmaModel->getInactiveUser($ss_act, $ss_next);
+
 		if (hasData($result))
 		{
-			if (!$outdated_user_arr = getData($result))
+			if (!$inactive_user_arr = getData($result))
 			{
-				show_error($outdated_user_arr->retval);
+				show_error($inactive_user_arr->retval);
+			}
+		}
+
+		/**
+		 *  For all inactive user, mark alma user as inactive (inactiveamum = today).
+		/*  Todays inactive user are reported with a purge date in ALMA.
+		/*  By setting inactiveamum with todays date they will not be queried as inactive user from tomorrow on.
+		 * */
+		foreach ($inactive_user_arr as $inactive_user)
+		{
+			$result = $this->AlmaModel->update(
+				$inactive_user->person_id,
+				array('inactiveamum' => $today)
+			);
+
+			if (isError($result))
+			{
+				show_error($result->retval);
 			}
 		}
 
@@ -180,20 +196,45 @@ class Alma extends Auth_Controller
 		}
 
 		/**
-		 * Get active campus user data.
+		 * Get active user data.
 		 * Retrieves user data incl. alma match id for present and new alma user. (just inserted to alma)
 		 * */
 		//  ------------------------------------------------------------------------------------------------------------
-		$campus_active_user_arr = $this->AlmaModel->getActiveCampusUserData($ss_act, $ss_next);
-		if (!$campus_active_user_arr = getData($campus_active_user_arr))
+		$active_user_arr = $this->AlmaModel->getActiveUser($ss_act, $ss_next);
+
+		if (!$active_user_arr = getData($active_user_arr))
 		{
-			show_error($campus_active_user_arr->retval);
+			show_error($active_user_arr->retval);
 		}
 
 		// Filter user with double person_id entries
-		$campus_active_user_arr = array_filter($campus_active_user_arr, function($elem) use ($double_person_arr){
+		$active_user_arr = array_filter($active_user_arr, function($elem) use ($double_person_arr){
 			return !in_array($elem->person_id, array_column($double_person_arr, 'person_id'));
 		});
+
+		/**
+		 * For all active user, mark alma user as active (again). (inactiveamum = NULL)
+		 * This step is needed in case person was inactive in the past but is active again.
+		 * e.g. Student ended with bachelor - was inactive. Goes on with master - active again.
+		 * */
+		foreach ($active_user_arr as $active_user)
+		{
+			$result = $this->AlmaModel->update(
+				$active_user->person_id,
+				array('inactiveamum' => NULL)
+			);
+
+			if (isError($result))
+			{
+				show_error($result->retval);
+			}
+		}
+
+
+		// Merge active campus user (including new user) with inactive ALMA user
+		//  ------------------------------------------------------------------------------------------------------------
+		$all_user_arr = array_merge($active_user_arr, $inactive_user_arr);
+
 
 		//  ------------------------------------------------------------------------------------------------------------
 		//  BUILD XML
@@ -201,12 +242,11 @@ class Alma extends Auth_Controller
 		//  <user>
 		//  ------------------------------------------------------------------------------------------------------------
 		$user_arr = array();    // Prepared user data for XML export
-		$today = (new DateTime())->format('Y-m-d');
 		$student_expiry_date = new DateTime();
 		$student_expiry_date->add(new DateInterval('P5Y'));
 		$student_expiry_date = $student_expiry_date->format('Y-m-d');
 
-		foreach ($campus_active_user_arr as $campus_user)
+		foreach ($all_user_arr as $campus_user)
 		{
 			$user = new StdClass();
 
@@ -214,15 +254,38 @@ class Alma extends Auth_Controller
 			$user->alma_match_id    = $campus_user->alma_match_id;
 			$user->first_name       = $campus_user->vorname;
 			$user->last_name        = $campus_user->nachname;
-			$user->user_title       = trim($campus_user->titelpre. ' '. $campus_user->titelpost);
+			$user->user_title       = !empty($campus_user->titelpre) || !empty($campus_user->titelpost)
+									? trim($campus_user->titelpre. ' '. $campus_user->titelpost)
+									: '-';
 			$user->gender           = $campus_user->geschlecht;
-			$user->birth_date       = (new DateTime($campus_user->gebdatum))->format('Y-m-d');
-			$user->expiry_date      = $campus_user->user_group_desc == 'Student'
-									? $student_expiry_date
-									: self::MITARBEITER_EXPIRY_DATE;
-			$user->purge_date       = $campus_user->user_group_desc == 'Student'
-									? $student_expiry_date
-									: self::MITARBEITER_EXPIRY_DATE;
+			$user->birth_date       = !empty($campus_user->gebdatum)
+									? (new DateTime($campus_user->gebdatum))->format('Y-m-d')
+									: '-';
+
+			/**
+			 * If user is inactive, set purge date to 6 months from now.
+			 * 6 months as buffer, in case user still needs to return book after deactivation.
+			 * Buffer also helpful, when user is deactivated e.g. as bachelor, but still will go on with master and is
+			 * not activated as master yet.
+			 */
+			if (!$campus_user->active)
+			{
+				$purge_date         = (new DateTime())->add(new DateInterval('P6M'));
+				$user->purge_date   = $purge_date->format('Y-m-d');
+				$user->expiry_date  = $user->purge_date ;
+			}
+			// Else if us is active, set purge date to default expiry date.
+			else
+			{
+				$user->expiry_date      = $campus_user->user_group_desc == 'Student'
+					? $student_expiry_date
+					: self::MITARBEITER_EXPIRY_DATE;
+
+				$user->purge_date   = $campus_user->user_group_desc == 'Student'
+					? $student_expiry_date
+					: self::MITARBEITER_EXPIRY_DATE;
+			}
+
 			$user->user_group_desc  = $campus_user->user_group_desc;
 			$user->user_group       = $campus_user->user_group_desc == 'Student'
 									? self::STUDENT_USER_GROUP
@@ -269,7 +332,7 @@ class Alma extends Auth_Controller
 
 
 			// UID
-			$user->uid = $campus_user->uid;
+			$user->uid = !empty($campus_user->uid) && !is_null($campus_user->uid) ? $campus_user->uid : '-'; // null for inactive user
 
 			//  Push user to user-array
 			//  --------------------------------------------------------------------------------------------------------
