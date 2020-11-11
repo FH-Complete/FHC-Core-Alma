@@ -79,36 +79,47 @@ class Alma_model extends DB_Model
 	}
 
 	/**
-	 * Get all present user.
-	 * Present user is active campus user that is also present in alma yet.
+	 * Get all inactive user.
+	 * Inactive user is alma user that is not present as active campus user anymore.
 	 */
-	public function getPresentUser($ss_act, $ss_next)
-	{
-		$active_campus_user = $this->_getQueryString_activeCampusUser($ss_act, $ss_next);
-
-		$qry = '
-			SELECT person_id FROM ('. $active_campus_user. ') AS campus
-			INTERSECT
-			SELECT person_id FROM sync.tbl_alma AS alma
-			ORDER BY person_id;
-		';
-
-		return $this->execQuery($qry);
-	}
-
-	/**
-	 * Get all outdated user.
-	 * Outdated user is alma user that is not present in active campus user anymore.
-	 */
-	public function getOutdatedUser($ss_act, $ss_next)
+	public function getInactiveUser($ss_act, $ss_next)
 	{
 		$campus_user = $this->_getQueryString_activeCampusUser($ss_act, $ss_next);
 
 		$qry = '
-			SELECT person_id FROM sync.tbl_alma AS alma
-			EXCEPT
-			SELECT person_id FROM ('. $campus_user. ') AS campus
-			ORDER BY person_id;
+			WITH inactive_person_ids AS (
+				SELECT person_id FROM sync.tbl_alma AS alma
+				EXCEPT
+				SELECT person_id FROM (' . $campus_user . ') AS campus
+				ORDER BY person_id
+			)
+			
+			SELECT  alma_match_id, 
+					alma.insertamum as "alma_insertamum",
+					alma.person_id,
+					NULL as uid,
+					vorname, nachname,
+					titelpre,
+					CASE 
+						WHEN EXISTS (SELECT 1 FROM campus.vw_mitarbeiter WHERE inactive_person_ids.person_id = vw_mitarbeiter.person_id) THEN \'Mitarbeiter\'
+						ELSE \'Student\'
+					END AS user_group_desc,
+					tbl_person.insertamum,
+					vornamen,
+					titelpost,
+					gebdatum,
+					CASE
+						WHEN geschlecht = \'m\' THEN \'MALE\'
+						WHEN geschlecht = \'w\' THEN \'FEMALE\'
+						WHEN geschlecht = \'x\' THEN \'OTHER\'
+						ELSE \'NONE\'
+					END AS geschlecht,
+					false AS active
+			FROM    inactive_person_ids
+			JOIN    public.tbl_person USING (person_id)
+			JOIN    sync.tbl_alma alma USING (person_id)
+			/* filter only inactive alma user, that were not already set as inactive in the past */ 
+			WHERE   alma.inactiveamum IS NULL OR alma.inactiveamum::date = NOW()::date;
 		';
 
 		return $this->execQuery($qry);
@@ -120,14 +131,14 @@ class Alma_model extends DB_Model
 	 * Campus user are retrieved unique by their prioritized role.
 	 * @return mixed
 	 */
-	public function getActiveCampusUserData($ss_act, $ss_next)
+	public function getActiveUser($ss_act, $ss_next)
 	{
 		$qry_campus_user = $this->_getQueryString_activeCampusUser($ss_act, $ss_next);
 
 		$qry = '
 			WITH tmp_tbl AS ('. $qry_campus_user. ')
 			
-			SELECT tbl_alma.alma_match_id, tbl_alma.insertamum AS alma_insertamum, tmp_tbl.*
+			SELECT tbl_alma.alma_match_id, tbl_alma.insertamum AS alma_insertamum, tmp_tbl.*, true as active
 			FROM tmp_tbl
 			LEFT JOIN sync.tbl_alma using (person_id)
 			ORDER BY person_id
