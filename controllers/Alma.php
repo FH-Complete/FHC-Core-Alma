@@ -8,13 +8,6 @@ if (! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Alma extends Auth_Controller
 {
-	const STUDENT_USER_GROUP = '01';
-	const STUDENT_EMAIL_TYPE_DESC = 'campus';
-	const MITARBEITER_USER_GROUP = '03';
-	const MITARBEITER_EXPIRY_DATE = '2099-12-31';
-	const MITARBEITER_EMAIL_TYPE_DESC = 'work';
-	const FILENAME_PREFIX = '03_ftw_';
-
 	/**
 	 * Constructor
 	 */
@@ -26,7 +19,7 @@ class Alma extends Auth_Controller
 			)
 		);
 
-//		// Loads config file
+		// Loads config file
 		$this->_ci =& get_instance(); // get code igniter instance
 		$this->_ci->config->load('extensions/FHC-Core-Alma/ALMAConfig');
 
@@ -242,9 +235,23 @@ class Alma extends Auth_Controller
 		//  <user>
 		//  ------------------------------------------------------------------------------------------------------------
 		$user_arr = array();    // Prepared user data for XML export
+
+		// Default student vars
+		$student_user_group = $this->config->item('student_user_group')
+			?: show_error('Missing config entry for student_user_group');
+		$student_email_type_desc = $this->config->item('student_email_type_desc')
+			?: show_error('Missing config entry for student_email_type_desc');
 		$student_expiry_date = new DateTime();
 		$student_expiry_date->add(new DateInterval('P5Y'));
 		$student_expiry_date = $student_expiry_date->format('Y-m-d');
+
+		// Default employee vars
+		$mitarbeiter_user_group = $this->config->item('mitarbeiter_user_group')
+			?: show_error('Missing config entry for mitarbeiter_user_group');
+		$mitarbeiter_email_type_desc = $this->config->item('mitarbeiter_email_type_desc')
+			?: show_error('Missing config entry for mitarbeiter_email_type_desc');
+		$mitarbeiter_expiry_date = $this->config->item('mitarbeiter_expiry_date')
+			?: show_error('Missing config entry for mitarbeiter_expiry_date');
 
 		foreach ($all_user_arr as $campus_user)
 		{
@@ -279,17 +286,17 @@ class Alma extends Auth_Controller
 			{
 				$user->expiry_date      = $campus_user->user_group_desc == 'Student'
 					? $student_expiry_date
-					: self::MITARBEITER_EXPIRY_DATE;
+					: $mitarbeiter_expiry_date;
 
 				$user->purge_date   = $campus_user->user_group_desc == 'Student'
 					? $student_expiry_date
-					: self::MITARBEITER_EXPIRY_DATE;
+					: $mitarbeiter_expiry_date;
 			}
 
 			$user->user_group_desc  = $campus_user->user_group_desc;
 			$user->user_group       = $campus_user->user_group_desc == 'Student'
-									? self::STUDENT_USER_GROUP
-									: self::MITARBEITER_USER_GROUP;
+									? $student_user_group
+									: $mitarbeiter_user_group;
 
 
 			//  <contact_info>
@@ -298,8 +305,8 @@ class Alma extends Auth_Controller
 			// <emails>
 			$user->email_address    = $campus_user->uid. '@'. DOMAIN;
 			$user->email_type_desc  = $campus_user->user_group_desc == 'Student'
-									? self::STUDENT_EMAIL_TYPE_DESC
-									: self::MITARBEITER_EMAIL_TYPE_DESC;
+									? $student_email_type_desc
+									: $mitarbeiter_email_type_desc;
 
 
 			//  <user_identifiers>
@@ -343,13 +350,16 @@ class Alma extends Auth_Controller
 		//  ------------------------------------------------------------------------------------------------------------
 		//  LOAD XML VIEW
 		//  ------------------------------------------------------------------------------------------------------------
+		$filename_prefix = $this->config->item('filename_prefix')
+			?: show_error('Missing config entry for filename_prefix');
+
 		$params = array('user_arr' => $user_arr);
 		$this->output->set_header('HTTP/1.0 200 OK');
 		$this->output->set_header('HTTP/1.1 200 OK');
 		$this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate');
 		$this->output->set_header('Cache-Control: post-check=0, pre-check=0');
 		$this->output->set_header('Pragma: no-cache');
-		$this->output->set_header('Content-Disposition: attachment; filename="'. self::FILENAME_PREFIX. $today. '.xml"');
+		$this->output->set_header('Content-Disposition: attachment; filename="'. $filename_prefix. $today. '.xml"');
 		$this->output->set_content_type('application/xml', 'utf-8');
 		$this->load->view('extensions/FHC-Core-Alma/export', $params);
 	}
