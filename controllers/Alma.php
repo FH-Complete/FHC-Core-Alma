@@ -41,6 +41,7 @@ class Alma extends Auth_Controller
 		// Loads libraries
 		$this->load->library('WidgetLib');
 		$this->load->library('PermissionLib');
+		$this->load->library('zip');
 
 		$this->_setAuthUID(); // sets property uid
 	}
@@ -348,20 +349,29 @@ class Alma extends Auth_Controller
 
 
 		//  ------------------------------------------------------------------------------------------------------------
-		//  LOAD XML VIEW
+		//  CREATE XML OUTPUT
 		//  ------------------------------------------------------------------------------------------------------------
-		$filename_prefix = $this->config->item('filename_prefix')
-			?: show_error('Missing config entry for filename_prefix');
-
 		$params = array('user_arr' => $user_arr);
+
 		$this->output->set_header('HTTP/1.0 200 OK');
 		$this->output->set_header('HTTP/1.1 200 OK');
 		$this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate');
 		$this->output->set_header('Cache-Control: post-check=0, pre-check=0');
 		$this->output->set_header('Pragma: no-cache');
-		$this->output->set_header('Content-Disposition: attachment; filename="'. $filename_prefix. $today. '.xml"');
 		$this->output->set_content_type('application/xml', 'utf-8');
 		$this->load->view('extensions/FHC-Core-Alma/export', $params);
+
+		$xml_content = $this->output->get_output();
+
+		//  ------------------------------------------------------------------------------------------------------------
+		//  COMPRESS XML OUTPUT (ZIP)
+		//  ------------------------------------------------------------------------------------------------------------
+		$filename_prefix = $this->config->item('filename_prefix')
+			?: show_error('Missing config entry for filename_prefix');
+
+		$this->zip->add_data($filename_prefix. $today. '.xml', $xml_content);
+		$this->zip->archive($filename_prefix. $today. '.zip');
+		$this->zip->download($filename_prefix. $today. '.zip');
 	}
 
 
