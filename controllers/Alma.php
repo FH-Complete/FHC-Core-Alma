@@ -262,9 +262,6 @@ class Alma extends Auth_Controller
 			$user->alma_match_id    = $campus_user->alma_match_id;
 			$user->first_name       = $campus_user->vorname;
 			$user->last_name        = $campus_user->nachname;
-			$user->user_title       = !empty($campus_user->titelpre) || !empty($campus_user->titelpost)
-									? trim($campus_user->titelpre. ' '. $campus_user->titelpost)
-									: '-';
 			$user->gender           = $campus_user->geschlecht;
 			$user->birth_date       = !empty($campus_user->gebdatum)
 									? (new DateTime($campus_user->gebdatum))->format('Y-m-d')
