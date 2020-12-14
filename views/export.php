@@ -13,6 +13,7 @@ $user_identifier_uid = $this->config->item('user_identifier_uid')
             <record_type>PUBLIC</record_type>
             <primary_id><?php echo $user->alma_match_id; ?></primary_id>
             <external_id>SIS</external_id>
+            <preferred_language>de</preferred_language>
             <first_name><?php echo $user->first_name; ?></first_name>
             <last_name><?php echo $user->last_name; ?></last_name>
             <user_title><?php echo $user->user_title; ?></user_title>
