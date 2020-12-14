@@ -265,7 +265,7 @@ class Alma extends Auth_Controller
 			$user->gender           = $campus_user->geschlecht;
 			$user->birth_date       = !empty($campus_user->gebdatum)
 									? (new DateTime($campus_user->gebdatum))->format('Y-m-d')
-									: '-';
+									: '';
 
 			/**
 			 * If user is inactive, set purge date to 6 months from now.
