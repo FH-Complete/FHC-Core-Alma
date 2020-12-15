@@ -106,7 +106,6 @@ class Alma_model extends DB_Model
 					END AS user_group_desc,
 					tbl_person.insertamum,
 					vornamen,
-					titelpost,
 					gebdatum,
 					CASE
 						WHEN geschlecht = \'m\' THEN \'MALE\'
@@ -155,7 +154,7 @@ class Alma_model extends DB_Model
 	private function _getQueryString_activeCampusUser($ss_act, $ss_next)
 	{
 		$qry_string = '
-		SELECT DISTINCT ON (person_id) person_id, uid, vorname, nachname, titelpre, user_group_desc, insertamum, vornamen, titelpost, gebdatum,
+		SELECT DISTINCT ON (person_id) person_id, uid, vorname, nachname, user_group_desc, insertamum, vornamen, gebdatum,
 		CASE
 			WHEN geschlecht = \'m\' THEN \'MALE\'
 			WHEN geschlecht = \'w\' THEN \'FEMALE\'
@@ -163,7 +162,7 @@ class Alma_model extends DB_Model
 			ELSE \'NONE\'
 		END AS geschlecht
 		FROM (
-			SELECT vorname, nachname, titelpre, person_id, uid, \'Student\' as user_group_desc, insertamum, vornamen, geschlecht, titelpost, gebdatum,
+			SELECT vorname, nachname, person_id, uid, \'Student\' as user_group_desc, insertamum, vornamen, geschlecht, gebdatum,
 				CASE WHEN stg.typ=\'m\' THEN 2
 				 	 WHEN stg.typ=\'b\' THEN 3
 				 	 WHEN stg.typ=\'l\' THEN 4
@@ -190,7 +189,7 @@ class Alma_model extends DB_Model
 
 			UNION
 
-			SELECT vorname, nachname, titelpre, person_id, uid, \'Mitarbeiter\' as user_group_desc, insertamum, vornamen, geschlecht, titelpost, gebdatum,
+			SELECT vorname, nachname, person_id, uid, \'Mitarbeiter\' as user_group_desc, insertamum, vornamen, geschlecht, gebdatum,
 				1 as prio
 			FROM campus.vw_mitarbeiter
 			WHERE aktiv
