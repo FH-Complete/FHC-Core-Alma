@@ -11,7 +11,7 @@ $user_identifier_uid = $this->config->item('user_identifier_uid')
     <?php foreach ($user_arr as $user): ?>
         <user>
             <record_type>PUBLIC</record_type>
-            <primary_id><?php echo $user->alma_match_id; ?></primary_id>
+            <primary_id><?php echo $user->uid; ?></primary_id>
             <external_id>SIS</external_id>
             <preferred_language>de</preferred_language>
             <first_name><?php echo $user->first_name; ?></first_name>

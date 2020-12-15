@@ -97,9 +97,16 @@ class Alma_model extends DB_Model
 			SELECT  alma_match_id, 
 					alma.insertamum as "alma_insertamum",
 					alma.person_id,
-					NULL as uid,
-					vorname, nachname,
-					titelpre,
+					(
+						/* use the UID which was lastly set inactive */ 
+						SELECT uid 
+						FROM public.tbl_benutzer
+						WHERE alma.person_id = tbl_benutzer.person_id
+						ORDER BY updateaktivam DESC
+						LIMIT 1
+					) AS uid,
+					vorname,
+					nachname,
 					CASE 
 						WHEN EXISTS (SELECT 1 FROM campus.vw_mitarbeiter WHERE inactive_person_ids.person_id = vw_mitarbeiter.person_id) THEN \'Mitarbeiter\'
 						ELSE \'Student\'
