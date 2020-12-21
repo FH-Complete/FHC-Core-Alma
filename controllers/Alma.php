@@ -258,17 +258,17 @@ class Alma extends Auth_Controller
 		{
 			$user = new StdClass();
 
+			$user->uid              = !empty($campus_user->uid)
+									? $campus_user->uid
+									: show_error('Missing UID for person_id '. $campus_user->person_id); // MUST-have in ALMA
 			$user->person_id        = $campus_user->person_id;
 			$user->alma_match_id    = $campus_user->alma_match_id;
 			$user->first_name       = $campus_user->vorname;
 			$user->last_name        = $campus_user->nachname;
-			$user->user_title       = !empty($campus_user->titelpre) || !empty($campus_user->titelpost)
-									? trim($campus_user->titelpre. ' '. $campus_user->titelpost)
-									: '-';
 			$user->gender           = $campus_user->geschlecht;
 			$user->birth_date       = !empty($campus_user->gebdatum)
 									? (new DateTime($campus_user->gebdatum))->format('Y-m-d')
-									: '-';
+									: '';
 
 			/**
 			 * If user is inactive, set purge date to 6 months from now.
@@ -338,9 +338,6 @@ class Alma extends Auth_Controller
 			}
 			$user->campus_card_id  = $campus_card_id;
 
-
-			// UID
-			$user->uid = !empty($campus_user->uid) && !is_null($campus_user->uid) ? $campus_user->uid : '-'; // null for inactive user
 
 			//  Push user to user-array
 			//  --------------------------------------------------------------------------------------------------------

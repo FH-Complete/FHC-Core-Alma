@@ -9,7 +9,7 @@ $config['user_identifier_uid'] = '01';
 // Config XML students
 // ---------------------------------------------------------------------------------------------------------------------
 $config['student_user_group'] = '01';
-$config['student_email_type_desc'] = 'campus';
+$config['student_email_type_desc'] = 'school';
 
 // Config XML employees
 // ---------------------------------------------------------------------------------------------------------------------
