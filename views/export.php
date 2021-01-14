@@ -44,10 +44,6 @@ $user_identifier_uid = $this->config->item('user_identifier_uid')
 				<id_type desc="Campus_Card_ID"><?php echo $user_identifier_campuscard_id; ?></id_type>
 				<value><?php echo $user->campus_card_id; ?></value>
 			</user_identifier>
-			<user_identifier>
-				<id_type desc="UID"><?php echo $user_identifier_uid; ?></id_type>
-				<value><?php echo $user->uid; ?></value>
-			</user_identifier>
 		</user_identifiers>
 	</user>
 <?php endforeach; ?>
