@@ -13,7 +13,7 @@ $user_identifier_uid = $this->config->item('user_identifier_uid')
 		<record_type>PUBLIC</record_type>
 		<primary_id><?php echo $user->uid; ?></primary_id>
 		<external_id>SIS</external_id>
-		<preferred_language>de</preferred_language>
+		<preferred_language>en</preferred_language>
 		<first_name><?php echo $user->first_name; ?></first_name>
 		<last_name><?php echo $user->last_name; ?></last_name>
 		<gender><?php echo $user->gender; ?></gender>
@@ -48,4 +48,3 @@ $user_identifier_uid = $this->config->item('user_identifier_uid')
 	</user>
 <?php endforeach; ?>
 </users>
-

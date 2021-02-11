@@ -29,16 +29,10 @@
 				<div class="row">
 					<div class="col-lg-12">
 						<p>Die Userdaten werden zwischen dem FH Campus und dem ALMA Bibliotheksystem synchronisiert.</p>
-						<p>Die aktualisierten Daten werden als XML file exportiert, gezippt und müssen dann im ALMA System hochgeladen werden.</p>
+						<p>Die aktualisierten Daten werden als XML ZIP File exportiert, und müssen dann im ALMA System hochgeladen werden.</p>
 					</div>
 				</div>
 				<br><br>
-				<div class="row">
-					<div class="col-lg-12">
-						<a role="button" class="btn btn-default col-xs-2" href="<?php echo site_url().'/extensions/FHC-Core-Alma/Alma/export';?>">Export XML</a>
-					</div>
-				</div>
-				<br><br><br><br>
 				<div class="row">
 					<div class="col-xs-8">
 						<h4>Aktuell vom Export ausgeschlossen</h4>

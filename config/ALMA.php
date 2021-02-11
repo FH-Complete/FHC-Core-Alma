@@ -20,6 +20,7 @@ $config['mitarbeiter_expiry_date'] = '2099-12-31';  // default expiry date for e
 // Config others
 // ---------------------------------------------------------------------------------------------------------------------
 $config['filename_prefix'] = '03_ftw';
+$config['export_path'] = '/var/fhcomplete/alma/';
 
 /**
  * Students of excluded study programs are not inserted into table ALMA and not exported to ALMA.
@@ -39,5 +40,3 @@ $config['excluded_study_programs'] = array(
  * Add both person IDs.
  */
 $config['allowed_double_personIDs'] = array(91163, 738, 107, 91170, 91109, 73322, 91108, 39488);
-
-
