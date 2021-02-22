@@ -224,15 +224,11 @@ class Alma extends JOB_Controller
 									: '';
 
 			/**
-			 * If user is inactive, set purge date to 6 months from now.
-			 * 6 months as buffer, in case user still needs to return book after deactivation.
-			 * Buffer also helpful, when user is deactivated e.g. as bachelor, but still will go on with master and is
-			 * not activated as master yet.
+			 * If user is inactive, set purge date to now.
 			 */
 			if (!$campus_user->active)
 			{
-				$purge_date         = (new DateTime())->add(new DateInterval('P6M'));
-				$user->purge_date   = $purge_date->format('Y-m-d');
+				$user->purge_date   = $today;
 				$user->expiry_date  = $user->purge_date ;
 			}
 			// Else if us is active, set purge date to default expiry date.
