@@ -201,6 +201,11 @@ class Alma_model extends DB_Model
 			FROM campus.vw_mitarbeiter
 			WHERE aktiv
 			AND personalnummer > 0
+		  	AND NOT (
+    			  ((SELECT count(*) FROM bis.tbl_bisverwendung WHERE mitarbeiter_uid = campus.vw_mitarbeiter.uid AND ba1code <> 108) = 0)
+    		 	  AND
+    			  (EXISTS (SELECT 1 FROM bis.tbl_bisverwendung WHERE mitarbeiter_uid = campus.vw_mitarbeiter.uid AND ba1code = 108))
+		  	)
 		) a
 		ORDER BY person_id, prio, insertamum DESC
 		';
