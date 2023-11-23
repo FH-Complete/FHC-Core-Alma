@@ -2,39 +2,31 @@
 
 if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-class Export extends API_Controller
+class Export extends FHC_Controller
 {
 
 	private $_ci; // Code igniter instance
 
-	private $_uid;
-
 	public function __construct()
 	{
-		parent::__construct(array(
-			'pdf' => 'extension/alma:rw'
-		));
+		parent::__construct();
 
 		$this->_ci =& get_instance();
 
 		$this->_ci->load->model('extensions/FHC-Core-Alma/AlmaProjektarbeit_model', 'AlmaProjektarbeitModel');
 		$this->_ci->load->model('education/Paabgabe_model', 'PaabgabeModel');
 		$this->_ci->load->config('extensions/FHC-Core-Alma/AlmaProjekt');
-
-		$this->_ci->load->helper('hlp_authentication');
-
-		$this->_setAuthUID();
 	}
 
-	/**
-	 * @return void
-	 */
 	public function getpdf()
 	{
-		$pseudo_id = $this->_ci->get('id');
+		if (!isset($_GET['id']))
+			show_error('Fehlerhafte Parameterübergabe');
 
-		if (is_null($pseudo_id))
-			$this->_ci->response(error('Fehlerhafte Parameterübergabe'), REST_Controller::HTTP_FORBIDDEN);
+		$pseudo_id = $_GET['id'];
+
+		if (isEmptyString($pseudo_id))
+			show_error('Fehlerhafte Parameterübergabe');
 
 		$result = $this->_ci->AlmaProjektarbeitModel->loadWhere(
 			array(
@@ -44,7 +36,7 @@ class Export extends API_Controller
 		);
 
 		if (isError($result))
-			$this->_ci->response(error('Fehlerhafte Parameterübergabe'), REST_Controller::HTTP_FORBIDDEN);
+			show_error('Fehlerhafte Parameterübergabe');
 
 		if (hasData($result))
 		{
@@ -53,12 +45,14 @@ class Export extends API_Controller
 			$projektArbeitResult = $this->_ci->PaabgabeModel->getEndabgabe($data[0]->projektarbeit_id);
 			
 			if (isError($projektArbeitResult))
-				$this->_ci->response(error('Fehlerhafte Parameterübergabe'), REST_Controller::HTTP_FORBIDDEN);
+				show_error('Fehlerhafte Parameterübergabe');
 
 			$projektArbeit = getData($projektArbeitResult)[0];
 
 			$this->_exportPDF($projektArbeit->filename);
 		}
+		else
+			show_error('Fehlerhafte Parameterübergabe');
 	}
 
 	private function _exportPDF($filename)
@@ -76,19 +70,8 @@ class Export extends API_Controller
 		}
 		else
 		{
-			$this->_ci->response(error('File does not exist.'), REST_Controller::HTTP_FORBIDDEN);
+			show_error('File does not exist.');
 		}
-	}
-
-	/**
-	 * Retrieve the UID of the logged user and checks if it is valid
-	 */
-	private function _setAuthUID()
-	{
-		$this->_uid = getAuthUID();
-
-		if (!$this->_uid)
-			$this->_ci->response(error('User authentification failed.'), REST_Controller::HTTP_FORBIDDEN);
 	}
 
 }

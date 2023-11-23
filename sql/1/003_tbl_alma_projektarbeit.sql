@@ -14,3 +14,4 @@ END $$;
 
 CREATE UNIQUE INDEX IF NOT EXISTS tbl_alma_projektarbeit_pseudo_id_uindex ON sync.tbl_alma_projektarbeit (pseudo_id);
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE sync.tbl_alma_projektarbeit TO vilesci;
+GRANT SELECT ON TABLE sync.tbl_alma_projektarbeit TO web;
