@@ -1,0 +1,59 @@
+<?php
+
+if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+
+class JQMSchedulerLib
+{
+	private $_ci; // Code igniter instance
+
+	const JOB_TYPE_ALMA_CREATE_XML_ABGABEN = 'ALMACreateXMLAbgaben';
+
+	/**
+	 * Object initialization
+	 */
+	public function __construct()
+	{
+		$this->_ci =& get_instance();
+		$this->_ci->load->config('extensions/FHC-Core-Alma/AlmaProjekt');
+	}
+
+	public function createAbgaben()
+	{
+		$jobInput = null;
+
+		$dbModel = new DB_Model();
+		$newAbgabeResult = $dbModel->execReadOnlyQuery("
+			SELECT
+				DISTINCT (tbl_projektarbeit.projektarbeit_id)
+			FROM
+				lehre.tbl_projektarbeit
+				JOIN lehre.tbl_lehreinheit USING(lehreinheit_id)
+				JOIN lehre.tbl_lehrveranstaltung ON(tbl_lehreinheit.lehrveranstaltung_id = tbl_lehrveranstaltung.lehrveranstaltung_id)
+				JOIN lehre.tbl_lehrveranstaltung as lehrfach ON(tbl_lehreinheit.lehrfach_id = lehrfach.lehrveranstaltung_id)
+				LEFT JOIN lehre.tbl_zeugnisnote ON(tbl_lehrveranstaltung.lehrveranstaltung_id = tbl_zeugnisnote.lehrveranstaltung_id
+												AND tbl_zeugnisnote.studiensemester_kurzbz = tbl_lehreinheit.studiensemester_kurzbz
+												AND tbl_projektarbeit.student_uid = tbl_zeugnisnote.student_uid)
+			WHERE
+				(
+					( tbl_projektarbeit.note > 0 AND tbl_projektarbeit.note < 5)
+					OR
+					( tbl_projektarbeit.note IS NULL AND tbl_zeugnisnote.note > 0 AND tbl_zeugnisnote.note < 5)
+				)
+				AND projekttyp_kurzbz IN ?
+				AND tbl_projektarbeit.titel IS not null
+				AND tbl_projektarbeit.freigegeben
+				AND tbl_projektarbeit.abgabedatum >= ?
+				AND projektarbeit_id NOT IN (SELECT projektarbeit_id FROM sync.tbl_alma_projektarbeit)",
+			[$this->_ci->config->item('projects_sync'), $this->_ci->config->item('project_abgabe_datum')]);
+		
+		if (isError($newAbgabeResult)) return $newAbgabeResult;
+		
+		if (hasData($newAbgabeResult))
+		{
+			$jobInput = json_encode(getData($newAbgabeResult));
+		}
+		
+		return success($jobInput);
+	}
+}
