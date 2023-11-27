@@ -91,31 +91,31 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 		<datafield tag="971" ind1="9" ind2=" ">
 			<subfield code="a"><?php echo str_replace(array(";", ","), ' /', $project->schlagwoerter_en); ?></subfield>
 		</datafield>
+		<datafield ind1=" " ind2=" " tag="035">
+			<subfield code="a">(VLID)AT-FTW</subfield>
+		</datafield>
+		<datafield ind1=" " ind2=" " tag="336">
+			<subfield code="b">txt</subfield>
+		</datafield>
+		<datafield ind1=" " ind2=" " tag="337">
+			<subfield code="b">c</subfield>
+		</datafield>
+		<datafield ind1=" " ind2=" " tag="338">
+			<subfield code="b">cr</subfield>
+		</datafield>
+		<datafield ind1=" " ind2=" " tag="347">
+			<subfield code="a">Textdatei</subfield>
+			<subfield code="b">PDF</subfield>
+		</datafield>
+		<datafield ind1=" " ind2="7" tag="655">
+			<subfield code="a">Hochschulschrift</subfield>
+			<subfield code="0">(DE-588)4113937-9</subfield>
+			<subfield code="2">gnd-content</subfield>
+		</datafield>
+		<datafield ind1=" " ind2=" " tag="990">
+			<subfield code="z">Daten sind nicht geprüft</subfield>
+			<subfield code="9">LOCAL</subfield>
+		</datafield>
 	</record>
-	<datafield ind1=" " ind2=" " tag="035">
-		<subfield code="a">(VLID)AT-FTW</subfield>
-	</datafield>
-	<datafield ind1=" " ind2=" " tag="336">
-		<subfield code="b">txt</subfield>
-	</datafield>
-	<datafield ind1=" " ind2=" " tag="337">
-		<subfield code="b">c</subfield>
-	</datafield>
-	<datafield ind1=" " ind2=" " tag="338">
-		<subfield code="b">cr</subfield>
-	</datafield>
-	<datafield ind1=" " ind2=" " tag="347">
-		<subfield code="a">Textdatei</subfield>
-		<subfield code="b">PDF</subfield>
-	</datafield>
-	<datafield ind1=" " ind2="7" tag="655">
-		<subfield code="a">Hochschulschrift</subfield>
-		<subfield code="0">(DE-588)4113937-9</subfield>
-		<subfield code="2">gnd-content</subfield>
-	</datafield>
-	<datafield ind1=" " ind2=" " tag="990">
-		<subfield code="z">Daten sind nicht geprüft</subfield>
-		<subfield code="9">LOCAL</subfield>
-	</datafield>
 <?php endforeach; ?>
 </collection>
