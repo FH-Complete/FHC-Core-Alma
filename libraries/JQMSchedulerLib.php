@@ -44,8 +44,11 @@ class JQMSchedulerLib
 				AND tbl_projektarbeit.titel IS not null
 				AND tbl_projektarbeit.freigegeben
 				AND tbl_projektarbeit.abgabedatum >= ?
+				AND NOW() >= (tbl_projektarbeit.abgabedatum + interval ?)
 				AND projektarbeit_id NOT IN (SELECT projektarbeit_id FROM sync.tbl_alma_projektarbeit)",
-			[$this->_ci->config->item('projects_sync'), $this->_ci->config->item('project_abgabe_datum')]);
+			[$this->_ci->config->item('projects_sync'),
+			$this->_ci->config->item('project_abgabe_datum'),
+			$this->_ci->config->item('project_sync_delay_days') . ' days']);
 		
 		if (isError($newAbgabeResult)) return $newAbgabeResult;
 		
