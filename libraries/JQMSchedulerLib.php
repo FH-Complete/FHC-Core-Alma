@@ -45,7 +45,7 @@ class JQMSchedulerLib
 				)
 				AND projekttyp_kurzbz IN ?
 				AND tbl_projektarbeit.titel IS not null
-				AND tbl_projektarbeit.freigegeben
+				AND (tbl_projektarbeit.gesperrtbis IS NOT NULL OR tbl_projektarbeit.freigegeben)
 				AND tbl_projektarbeit.abgabedatum >= ?
 				AND NOW() >= (tbl_projektarbeit.abgabedatum + interval ?)
 				AND projektarbeit_id NOT IN (SELECT projektarbeit_id FROM sync.tbl_alma_projektarbeit)
