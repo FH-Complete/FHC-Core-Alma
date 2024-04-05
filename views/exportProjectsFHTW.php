@@ -48,10 +48,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 			<subfield code="2"><![CDATA[star]]></subfield>
 		</datafield>
 		<datafield tag="520" ind1=" " ind2=" ">
-			<subfield code="a"><![CDATA[<?php echo "ger: " . str_replace(array("\r\n", "\r", "\n"), '', $project->abstract); ?>]]></subfield>
+			<subfield code="a"><![CDATA[<?php echo "ger: " . str_replace(array("\r\n", "\r", "\n"), '', htmlspecialchars($project->abstract, ENT_DISALLOWED)); ?>]]></subfield>
 		</datafield>
 		<datafield tag="520" ind1=" " ind2=" ">
-			<subfield code="a"><![CDATA[<?php echo "eng: " . str_replace(array("\r\n", "\r", "\n"), '', $project->abstract_en); ?>]]></subfield>
+			<subfield code="a"><![CDATA[<?php echo "eng: " . str_replace(array("\r\n", "\r", "\n"), '', htmlspecialchars($project->abstract_en, ENT_DISALLOWED)); ?>]]></subfield>
 		</datafield>
 		<datafield tag="856" ind1="4" ind2="0">
 			<subfield code="u"><![CDATA[<?php echo $project_url . $project->pseudo_id ?>]]></subfield>
