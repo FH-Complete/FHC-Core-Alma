@@ -48,10 +48,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 			<subfield code="2"><![CDATA[star]]></subfield>
 		</datafield>
 		<datafield tag="520" ind1=" " ind2=" ">
-			<subfield code="a"><![CDATA[<?php echo "ger: " . str_replace(array("\r\n", "\r", "\n"), '', htmlspecialchars($project->abstract, ENT_DISALLOWED)); ?>]]></subfield>
+			<subfield code="a"><![CDATA[<?php echo "ger: " . str_replace(array("\r\n", "\r", "\n"), '', preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', htmlspecialchars($project->abstract, ENT_DISALLOWED | ENT_XML1))); ?>]]></subfield>
 		</datafield>
 		<datafield tag="520" ind1=" " ind2=" ">
-			<subfield code="a"><![CDATA[<?php echo "eng: " . str_replace(array("\r\n", "\r", "\n"), '', htmlspecialchars($project->abstract_en, ENT_DISALLOWED)); ?>]]></subfield>
+			<subfield code="a"><![CDATA[<?php echo "eng: " . str_replace(array("\r\n", "\r", "\n"), '', preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', htmlspecialchars($project->abstract_en, ENT_DISALLOWED|ENT_XML1))); ?>]]></subfield>
 		</datafield>
 		<datafield tag="856" ind1="4" ind2="0">
 			<subfield code="u"><![CDATA[<?php echo $project_url . $project->pseudo_id ?>]]></subfield>
@@ -66,11 +66,15 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 				<subfield code="a"><![CDATA[<?php echo $erstBegutachter->nachname . ', ' . $erstBegutachter->vorname; ?>]]></subfield>
 			</datafield>
 		<?php endforeach; ?>
-		<?php foreach ($project->zweitBegutachter as $zweitBegutachter): ?>
-			<datafield tag="971" ind1="1" ind2=" ">
-				<subfield code="a"><![CDATA[<?php echo $zweitBegutachter->nachname . ', ' . $zweitBegutachter->vorname; ?>]]></subfield>
-			</datafield>
-		<?php endforeach; ?>
+		<?php
+			if(isset($project->zweitBegutachter))
+			{
+				foreach ($project->zweitBegutachter as $zweitBegutachter): ?>
+					<datafield tag="971" ind1="1" ind2=" ">
+						<subfield code="a"><![CDATA[<?php echo $zweitBegutachter->nachname . ', ' . $zweitBegutachter->vorname; ?>]]></subfield>
+					</datafield>
+				<?php endforeach;
+			} ?>
 		<datafield tag="971" ind1="3" ind2=" ">
 			<subfield code="a"><![CDATA[<?php echo date('Y', strtotime($project->abgabedatum)); ?>]]></subfield>
 		</datafield>
