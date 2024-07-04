@@ -90,10 +90,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 			</datafield>
 		<?php endif; ?>
 		<datafield tag="971" ind1="8" ind2=" ">
-			<subfield code="a"><![CDATA[<?php echo (str_replace(array(";", ","), ' /', $project->schlagwoerter)); ?>]]></subfield>
+			<subfield code="a"><![CDATA[<?php echo (str_replace(array(";", ","), ' /', preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', htmlspecialchars($project->schlagwoerter, ENT_DISALLOWED|ENT_XML1)))); ?>]]></subfield>
 		</datafield>
 		<datafield tag="971" ind1="9" ind2=" ">
-			<subfield code="a"><![CDATA[<?php echo (str_replace(array(";", ","), ' /', $project->schlagwoerter_en)); ?>]]></subfield>
+			<subfield code="a"><![CDATA[<?php echo (str_replace(array(";", ","), ' /', preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', htmlspecialchars($project->schlagwoerter_en, ENT_DISALLOWED|ENT_XML1)))); ?>]]></subfield>
 		</datafield>
 		<datafield ind1=" " ind2=" " tag="035">
 			<subfield code="a"><![CDATA[(VLID)AT-FTW]]></subfield>
