@@ -87,7 +87,7 @@ class SyncAbgabenLib
 		
 		$dbProjectsData = $dbModel->execReadOnlyQuery("
 			SELECT
-			*, tbl_lehreinheit.studiensemester_kurzbz, tbl_projektarbeit.student_uid as stud_uid,
+			*, tbl_projektarbeit.studiensemester_kurzbz, tbl_projektarbeit.student_uid as stud_uid,
 			(
 				WITH RECURSIVE meine_oes(oe_kurzbz, oe_parent_kurzbz, organisationseinheittyp_kurzbz) as
 				(
@@ -124,9 +124,7 @@ class SyncAbgabenLib
 			tbl_studiengang.melde_studiengang_kz as melde_stg_kz
 		FROM
 			lehre.tbl_projektarbeit
-			JOIN lehre.tbl_lehreinheit USING(lehreinheit_id)
-			JOIN lehre.tbl_lehrveranstaltung ON(tbl_lehreinheit.lehrveranstaltung_id = tbl_lehrveranstaltung.lehrveranstaltung_id)
-			JOIN lehre.tbl_lehrveranstaltung as lehrfach ON(tbl_lehreinheit.lehrfach_id = lehrfach.lehrveranstaltung_id)
+			JOIN lehre.tbl_lehrveranstaltung ON(tbl_projektarbeit.lehrveranstaltung_id = tbl_lehrveranstaltung.lehrveranstaltung_id)
 			LEFT JOIN lehre.tbl_zeugnisnote ON(tbl_lehrveranstaltung.lehrveranstaltung_id = tbl_zeugnisnote.lehrveranstaltung_id
 											AND tbl_zeugnisnote.studiensemester_kurzbz = tbl_lehreinheit.studiensemester_kurzbz
 											AND tbl_projektarbeit.student_uid = tbl_zeugnisnote.student_uid)
